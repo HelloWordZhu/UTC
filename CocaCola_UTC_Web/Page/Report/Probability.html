@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+    <!--<link href="../../EXT/resources/css/ext-all.css" rel="Stylesheet" />-->
+    <link href="../../EXT/resources/css/ext-neptune.css" rel="Stylesheet" />
+    <script src="../../EXT/ext-all.js" type="text/javascript"></script>
+    <link href="../../EXT/ux/css/example.css" rel="Stylesheet" />
+    <script src="../../EXT/bootstrap.js" type="text/javascript"></script>
+    <script src="../../EXT/ext-lang-zh_CN.js" type="text/javascript"></script>
+    <script src="../../script/ExtComme.js" type="text/javascript"></script>
+    <script src="../../script/json2.js" type="text/javascript"></script>
+    <script language="javascript" type="text/javascript" src="../../EXT/ux/examples.js"></script>
+    <script type="text/javascript">
+    Ext.onReady(function () {
+        //创建用户列表MOodel
+        Ext.define('ProbabilityModel', {
+            extend: 'Ext.data.Model',
+            idProperty: 'ID', //设置主键
+            fields: [
+                { name: 'ExecuteDate', type: 'string' },
+                { name: 'YearProbability', type: 'string' },
+                { name: 'YearCol', type: 'string' },
+                { name: 'MonthProbability', type: 'string' },
+                { name: 'MonthCol', type: 'string' },
+                { name: 'WeekProbability', type: 'string' },
+                { name: 'WeekCol', type: 'string' },
+                { name: 'CreateTime', type: 'string' }
+            ]
+        });
+
+        var store = Ext.create('Ext.data.Store', {
+            model: 'ProbabilityModel',
+            autoLoad: true,
+            pageSize: 26,
+            proxy: {
+                type: 'ajax',
+                url: oa_url, //获取json地址
+                //Reader 解码json数据
+                actionMethods: { read: 'post' },
+                reader: {
+                    type: 'json',
+                    root: 'Table',
+                    totalProperty: 'Table1'
+                }
+            },
+            listeners: {
+                "beforeload": function (store) {
+                    Ext.apply(store.proxy.extraParams, { Menthod: 'GetProbabilityList'});    //带参数
+                }
+            }
+        });
+
+        var grid = new Ext.create('Ext.grid.Panel', {
+            id: 'StudentGrid',
+            store: store,
+            columnLines: true, //单元格纵向边框
+            frame: true,
+            height: Grobalheight,
+            maximizable: true,
+            renderTo: Ext.getBody(),
+            rowLines: true,
+            viewConfig: {
+                stripeRows: true,
+                enableTextSelection: true
+            },
+            columns: [{
+                text: '执行时间',
+                width: 100,
+                dataIndex: 'ExecuteDate'
+            }, {
+                text: '年卡中奖概率',
+                width: 100,
+                dataIndex: 'YearProbability'
+            }, {
+                text: '年卡熔断线',
+                width: 100,
+                dataIndex: 'YearCol'
+            }, {
+                text: '月卡中奖概率',
+                width: 100,
+                dataIndex: 'MonthProbability'
+            }, {
+                text: '月卡熔断线',
+                width: 100,
+                dataIndex: 'MonthCol'
+            }, {
+                text: '周卡中奖概率',
+                width: 100,
+                dataIndex: 'WeekProbability'
+            }, {
+                text: '周卡熔断线',
+                width: 100,
+                dataIndex: 'WeekCol'
+            }, {
+                text: '设置时间',
+                width: 200,
+                dataIndex: 'CreateTime'
+            }],
+            bbar: [{
+                xtype: 'pagingtoolbar',
+                store: store,
+                displayInfo: true,
+                displayMsg: '显示 {0} - {1} 条，共计 {2} 条',
+                emptyMsg: "没有数据"
+            }]
+        });
+    });
+    </script>
+</head>
+<body>
+
+</body>
+</html>

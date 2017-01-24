@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <link href="../EXT/resources/css/ext-neptune.css" rel="Stylesheet" />
+    <link href="../EXT/ux/css/example.css" rel="Stylesheet" />
+    <script language="javascript" type="text/javascript" src="../EXT/ext-all.js"></script>
+    <script language="javascript" type="text/javascript" src="../EXT/bootstrap.js"></script>
+    <script language="javascript" type="text/javascript" src="../script/ExtComme.js"></script>
+    <script language="javascript" type="text/javascript" src="../EXT/ext-lang-zh_CN.js"></script>
+    <script language="javascript" type="text/javascript" src="../EXT/ux/examples.js"></script>
+    <script language="javascript" type="text/javascript" src="script/GetNowTime.js"></script>
+    <script type="text/javascript"  >
+
+        Ext.onReady(function () {
+
+
+
+            Ext.create('Ext.container.Viewport', {
+                enableTabScroll: true,
+                layout: "border",
+                items: [
+                    {
+                        region: "north",
+                        height: 0
+                        //html: '<iframe scrolling="auto" frameborder="0" width="100%" height="100%" src="Top.html"> </iframe>'
+
+                    }, {
+                        title: "菜单",
+                        region: "west",
+                        width: 210,
+                        collapsible:false,
+                        id: "menu",
+                        layout: 'accordion',
+                        split: true,
+                        layoutConfig: { animate: true } // 表示在执行展开折叠时是否应用动画效果
+                    }, {
+                        xtype: "panel",
+                        region: "center",
+                        id: "MainPanel",
+                        title: '系统通告',
+                        layout: 'fit'
+                    }, {
+                        region: 'south',
+                        title: "<div align='right'>系统时间:<font  id='Nowtime'>1</font></div>",
+                        xtype: 'panel',
+                        height: 26,
+                        id: 'south-panel',
+                        margins: '0 3 0 3'
+                    }
+                    ]
+            });
+
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            var leftmenu = Ext.getCmp("menu");
+           // leftmenu.hide();//先隐藏左边菜单(防止添加子菜单的过程中让用户看见,体验不佳)
+            Ext.Ajax.request({
+                url: oa_url,
+                params: { Menthod: "GetLeftMenu" },
+                method: 'POST',
+                success: function (response, options) {
+                    if (response.responseText != "") {
+                        var result = Ext.JSON.decode(response.responseText);
+                        for (var i = 0; i < result.length; i++) {
+                            var panel = Ext.create('Ext.panel.Panel', {
+                                id: "Menu" + result[i].ID,
+                                title: result[i].MenuName,
+                                //height: 300,
+                                style: 'text-align:center',
+                                layout: 'fit'
+                            });
+                            panel.add(buildTree(result[i].ID));
+                            leftmenu.hide();
+                            leftmenu.add(panel);
+                            leftmenu.show();
+                            
+                        }
+                        //leftmenu.show();
+                    }
+
+                }
+            });
+            
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            var buildTree = function (id) {
+                var Store = Ext.create('Ext.data.TreeStore', {
+                    proxy: {
+                        type: 'ajax',
+                        url: oa_url
+                    },
+                    reader: {
+                        type: 'json'
+                    },
+                    listeners: {
+                        "beforeload": function (store) {
+                            Ext.apply(store.proxy.extraParams, { Menthod: 'GetLeftMenuTree', TreeType: id });    //带参数
+                        }
+                    }
+                });
+                return Ext.create('Ext.tree.Panel', {
+                    rootVisible: false,
+                    border: false,
+                    layout: 'fit',
+                    deferredRender: false,
+                    autoScroll: true,
+                    store: Store,
+                    listeners: {
+                        'itemclick': function (view, record, item,
+                                index, e) {
+                            if (record.get('id') != "root") {
+                                addTab(record.get('text'), record.get('id'), record.get('hrefTarget'));
+                            }
+                        },
+                        scope: this
+                    }
+                });
+            };
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+            function addTab(text, id, href) {
+                var tabPanel = Ext.getCmp("MainPanel");
+                tabPanel.setTitle(text);
+                tabPanel.body.update('<iframe scrolling="auto" frameborder="0" width="100%" height="100%" src="' + href + '"> </iframe>');
+            }
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>
