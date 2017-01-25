@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+    <link href="../EXT/resources/css/ext-neptune.css" rel="Stylesheet" />
+    <link href="../EXT/ux/css/example.css" rel="Stylesheet" />
+    <script language="javascript" type="text/javascript" src="../EXT/ext-all.js"></script>
+    <script language="javascript" type="text/javascript" src="../EXT/bootstrap.js"></script>
+    <script language="javascript" type="text/javascript" src="../script/ExtComme.js"></script>
+    <script language="javascript" type="text/javascript" src="../EXT/ext-lang-zh_CN.js"></script>
+    <script language="javascript" type="text/javascript" src="../EXT/ux/examples.js"></script>
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            var LoginPanel = Ext.create("Ext.form.Panel", {
+                id: 'LoginPanel',
+                renderTo: Ext.getBody(),
+                bodyPadding: 50,
+                layout: {
+                    type: 'table',
+                    columns: 1
+                },
+                defaultType: 'textfield',
+                defaults: {
+                    bodyStyle: 'padding:20px',
+                    margin: '15 0 0 5',
+                    width: 350
+                },
+                items: [{
+                    fieldLabel: '用户名',
+                    id: 'UserAccount',
+                    labelWidth: 100,
+                    margin: '20 0 0 5',
+                    allowBlank: false
+                }, {
+                    fieldLabel: '密码',
+                    id: 'PassWord',
+                    labelWidth: 100,
+                    inputType: 'password',
+                    allowBlank: false
+                }]
+            });
+
+            var LoginWin = Ext.create("Ext.window.Window", {
+                title: 'UTC熔断系统',
+                id: 'LoginWin',
+                height: 250,
+                layout: 'fit',
+                modal: true,
+                closable: false,
+                draggable: false,
+                width: 460,
+                items: [LoginPanel],
+                closeAction: 'hide',
+                buttons: [{
+                    text: '登入',
+                    xtype: 'button',
+                    handler: function () {
+                        var basicform = Ext.getCmp("LoginPanel").getForm();
+                        if (basicform.isValid()) {
+                            Login();
+                        }
+                    }
+                }]
+            });
+            LoginWin.show();
+
+            function Login()
+            {
+                var array_main = new Object();
+                array_main.UserAccount = Ext.getCmp("UserAccount").getValue();
+                array_main.PassWord = Ext.getCmp("PassWord").getValue();
+                var MainStr = "[" + JSON.stringify(array_main) + "]";
+                Ext.Ajax.request({
+                    url: oa_url,
+                    waitTitle: "系统提示",
+                    waitMSG: "数据正在处理中....",
+                    params: { Menthod: "ValidateLogin", MainStr: MainStr },
+                    method: 'POST',
+                    success: function (response, options) {
+                        var resultmsg = response.responseText.split("@")[0];
+                        var resultfalg = response.responseText.split("@")[1];
+                        if (resultfalg == "fail") {
+                            Ext.Msg.alert("系统提示", resultmsg);
+                        }
+                        else
+                        {
+                            window.location.href='Main.html';
+                            //Ext.Msg.alert("系统提示", resultmsg);
+                        }
+                    },
+                    failure: function (resp, opts) {
+                        //var respText = Ext.util.JSON.decode(resp.responseText);
+                        Ext.Msg.alert('系统出错', respText.error);
+                    }
+                });
+            }
+        });
+
+    </script>
+</head>
+<body>
+
+</body>
+</html>

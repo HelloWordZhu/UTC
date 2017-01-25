@@ -24,12 +24,12 @@ Ext.Ajax.on('requestcomplete', function (conn, response, options) {
         
         if (top.location != this.location) {
            parent.Ext.Msg.alert('提示', '会话超时，请重新登录!', function () {
-                top.location.replace(les_url + "/Index.aspx");
+               top.location.replace(les_url + "/Login.html");
             });
         }
         else {
             Ext.Msg.alert('提示', '会话超时，请重新登录!', function () {
-                window.location = les_url + "/Index.aspx";
+                window.location = les_url + "/Login.html";
             });
         }
     }

@@ -3,13 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.SessionState;
 
 namespace CocaCola_UTC_Web
 {
     /// <summary>
     /// Summary description for LogicRoute
     /// </summary>
-    public class LogicRoute : IHttpHandler
+    public class LogicRoute : IHttpHandler, IRequiresSessionState
     {
 
         public void ProcessRequest(HttpContext context)
@@ -17,9 +18,11 @@ namespace CocaCola_UTC_Web
             context.Response.ContentType = "text/html";
             string Menthod = context.Request["Menthod"];
             string result = string.Empty;
-            //context.Session["Code"] = "1";
-            //context.Session["UserPosition"] = "10004";
-            //context.Session["UserAdress"] = "成都";
+            // context.Session["IsFirstLogin"] = "False";
+            if (context.Session["IsFirstLogin"] == null && Menthod != "ValidateLogin")
+            {
+                context.Response.AddHeader("_timeout", "true");
+            }
             switch (Menthod)
             {
                 //管理菜单显示
@@ -36,6 +39,18 @@ namespace CocaCola_UTC_Web
 
                 case "GetProbabilityList":
                     result = Probability.GetProbabilityList(context);
+                    break;
+
+                case "ValidateLogin":
+                    result = Login.ValidateLogin(context);
+                    break;
+
+                case "VicateFirstLogin":
+                    result = context.Session["IsFirstLogin"].ToString();
+                    break;
+
+                case "SaveNewPassword":
+                    result = Login.SaveNewPassword(context);
                     break;
             }
             context.Response.Write(result);
